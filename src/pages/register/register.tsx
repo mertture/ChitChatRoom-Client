@@ -14,7 +14,7 @@ const Register: React.FC = () => {
   const onFinish = async (values: LoginRegisterReqBody) => {
     try {
       setResult(false);
-      await axios.post("http://localhost:8080/register", values);
+      await axios.post("http://localhost:8080/api/user/register", values);
       setResult(true);
       navigate("/login");
     } catch (error: any) {

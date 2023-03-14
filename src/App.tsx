@@ -20,15 +20,15 @@ function App() {
   const token: string = localStorage.getItem("token")!;
   const [user, setUser] = useState<User | null>(null);
 
+  const checkAuth = async () => {
+    const userValue: User = await checkAuthentication(pathname, token)!;
+    setUser(userValue);
+  };
+
   useEffect(() => {
-    // Perform any asynchronous operations here, and then set the loading state to false
-    const checkAuth = async () => {
-      const userValue: User = await checkAuthentication(pathname, token)!;
-      setUser(userValue);
-    };
-    //checkAuth();
+    checkAuth();
     setLoading(false);
-  }, []);
+  }, [user]);
 
   if (loading) {
     return <Loading />;
@@ -37,7 +37,7 @@ function App() {
   return (
     <React.Suspense fallback={<div>Loading...</div>}>
       <Routes>
-        {!user ?
+        {user === null ?
         <>
         <Route path="/register" Component={Register} />
         <Route path="/login" Component={Login} />

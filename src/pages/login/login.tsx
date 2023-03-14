@@ -14,8 +14,9 @@ const Login: React.FC = () => {
   const onFinish = async (values: LoginRegisterReqBody) => {
     try {
       setResult(false);
-      const response = await axios.post("http://localhost:8080/login", values);
-      localStorage.setItem("token", response.data.token);
+      const response = await axios.post("http://localhost:8080/api/user/login", values);
+      console.log(response);
+      localStorage.setItem("token", response.data);
       navigate("/dashboard");
       setResult(true);
     } catch (error: any) {

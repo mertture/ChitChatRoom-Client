@@ -11,10 +11,11 @@ export async function checkAuthentication(
 ): Promise<User> {
   try {
     if (!token) throw new Error('no token')
-    const user = (await (
+    console.log("TOKEN:", token);
+    const user = await (
       await fetch(
         new URL(
-          (process.env.PUBLIC_URL ?? 'http://localhost:8080') +
+          ('http://localhost:8080') +
             '/api/user/me'
         ).href,
         {
@@ -25,7 +26,8 @@ export async function checkAuthentication(
           },
         }
       )
-    ).json()) as User
+    ).json() as User
+    console.log("USER:", user);
     return user;
   } catch (error) {
     console.log(error)

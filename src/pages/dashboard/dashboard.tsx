@@ -8,23 +8,23 @@ interface User {
 const Dashboard: React.FC = () => {
   const [user, setUser] = useState<User>({ email: "" });
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get("http://localhost:8080/dashboard", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setUser(response.data.user);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+  const fetchUser = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:8080/api/user/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setUser(response.data.user);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
+  useEffect(() => {
     fetchUser();
-  }, []);
+  }, [user]);
 
   return (
     <div>
