@@ -4,19 +4,20 @@ import { Button, Card, Form, Input, Typography } from 'antd';
 import LoginRegisterReqBody from '../../models/user/loginRegisterReqBody';
 import axios from "axios";
 
-const Register: React.FC = () => {
+const Login: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<boolean>(true);
-  const [form] = Form.useForm()
+  const [form] = Form.useForm();
 
   const navigate = useNavigate();
 
   const onFinish = async (values: LoginRegisterReqBody) => {
     try {
       setResult(false);
-      await axios.post("http://localhost:8080/register", values);
+      const response = await axios.post("http://localhost:8080/login", values);
+      localStorage.setItem("token", response.data.token);
+      navigate("/dashboard");
       setResult(true);
-      navigate("/login");
     } catch (error: any) {
       setError(error.response.data.error);
       setResult(true);
@@ -71,7 +72,7 @@ const Register: React.FC = () => {
           </Form.Item>
           <Form.Item>
             <Button loading={!result} block htmlType="submit">
-              Register
+              Login
             </Button>
           </Form.Item>
         </Form>
@@ -80,4 +81,4 @@ const Register: React.FC = () => {
   );
 };
 
-export default Register;
+export default Login;
