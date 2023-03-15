@@ -8,6 +8,9 @@ import './styles/global.css'
 import Register from './pages/register/register';
 import Login from './pages/login/login';
 import Loading from './pages/loading/loading';
+import CreateRoom from './pages/room/createRoom';
+import Room from './pages/room/room';
+
 
 import User from './models/user/user';
 
@@ -49,6 +52,9 @@ function App() {
         :
         <>
         <Route path="/dashboard" Component={Dashboard} />
+        <Route path="/createroom" Component={CreateRoom} />
+        <Route path="/room/:id" Component={Room} />
+
         </>
         }
       </Routes>
