@@ -21,14 +21,17 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
 
   const checkAuth = async () => {
+    console.log("user:");
     const userValue: User = await checkAuthentication(pathname, token)!;
+    console.log("user:", userValue);
+
     setUser(userValue);
   };
 
   useEffect(() => {
     checkAuth();
     setLoading(false);
-  }, [user]);
+  }, [pathname]);
 
   if (loading) {
     return <Loading />;

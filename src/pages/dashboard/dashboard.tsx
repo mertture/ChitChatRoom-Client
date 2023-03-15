@@ -6,7 +6,7 @@ interface User {
 }
 
 const Dashboard: React.FC = () => {
-  const [user, setUser] = useState<User>({ email: "" });
+  const [user, setUser] = useState<User | null>(null);
 
   const fetchUser = async () => {
     try {
@@ -16,7 +16,8 @@ const Dashboard: React.FC = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setUser(response.data.user);
+      console.log(response);
+      setUser(response.data);
     } catch (error) {
       console.error(error);
     }
@@ -24,11 +25,15 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     fetchUser();
-  }, [user]);
+  }, []);
 
   return (
     <div>
+      { user !== null ?
       <h1>Welcome, {user.email}!</h1>
+      :
+        ""
+      }
     </div>
   );
 };
