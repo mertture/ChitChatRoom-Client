@@ -8,44 +8,11 @@ import User from "../../models/user/user";
 const Room: React.FC = () => {
 
   const navigate = useNavigate();
-  const { roomId } = useParams();
+  const { id: roomId } = useParams();
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [room, setRoom] = useState<RoomType | null>(null);
   const [participants, setParticipants] = useState<Array<User> | null>(null);
-
-  const fetchUser = async () => {
-    try {
-      if (token) {
-        const response = await axios.get("http://localhost:8080/api/user/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        console.log(response);
-        setUser(response.data);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const fetchRoom = async () => {
-    try {
-      if (token) {
-        const response = await axios.get(`http://localhost:8080/api/room/${roomId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        console.log("fetch rooms:", response);
-        setRoom(response.data);
-        setParticipants(response.data.participants);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -53,9 +20,43 @@ const Room: React.FC = () => {
   }, [])
 
   useEffect(() => {
+
+    const fetchUser = async () => {
+      try {
+        if (token) {
+          const response = await axios.get("http://localhost:8080/api/user/me", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          console.log(response);
+          setUser(response.data);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+  
+    const fetchRoom = async () => {
+      try {
+        if (token && roomId) {
+          const response = await axios.get(`http://localhost:8080/api/room/${roomId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          console.log("fetch rooms:", response);
+          setRoom(response.data);
+          setParticipants(response.data.participants);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
     fetchUser();
     fetchRoom();
-  }, [token]);
+  }, [token, roomId]);
 
   return (
     <div>

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 import axios from "axios";
 import Room from "../../models/room/room";
 import User from "../../models/user/user";
+import RoomModal from "../room/roomModal";
 
 
 
@@ -11,10 +12,11 @@ import User from "../../models/user/user";
 const Dashboard: React.FC = () => {
 
   const navigate = useNavigate();
-
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [rooms, setRooms] = useState<Array<Room> | null>(null);
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+
 
   const goToCreateRoom = (e: any) => {
     e.preventDefault();
@@ -22,55 +24,53 @@ const Dashboard: React.FC = () => {
     navigate("/createroom")
   }
 
-  const goToRoom = (e: any, roomId: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log("room:", roomId);
-    navigate(`/room/${roomId}`)
-  }
+  
 
-
-  const fetchUser = async () => {
-    try {
-      if (token) {
-        const response = await axios.get("http://localhost:8080/api/user/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        console.log(response);
-        setUser(response.data);
-      }
-    } catch (error) {
-      console.error(error);
-    }
+  const handleRoomClick = (room: Room) => {
+    setSelectedRoom(room);
   };
 
-  const fetchRooms = async () => {
-    try {
-      if (token) {
-        const response = await axios.get("http://localhost:8080/api/rooms", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        console.log("fetch rooms:", response);
-        setRooms(response.data);
+  useEffect(() => {
+
+    const fetchUser = async () => {
+      try {
+        if (token) {
+          const response = await axios.get("http://localhost:8080/api/user/me", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          setUser(response.data);
+        }
+      } catch (error) {
+        console.error(error);
       }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    };
+  
+    const fetchRooms = async () => {
+      try {
+        if (token) {
+          const response = await axios.get("http://localhost:8080/api/rooms", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          console.log("fetch rooms:", response);
+          setRooms(response.data);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchUser();
+    fetchRooms();
+  }, [token]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     setToken(token);
-  }, [])
-
-  useEffect(() => {
-    fetchUser();
-    fetchRooms();
-  }, [token]);
+  }, []);
 
   return (
     <div>
@@ -80,16 +80,19 @@ const Dashboard: React.FC = () => {
         ""
       }
       {rooms !== null ?
-        <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-          {rooms.map((room) => (
-            <button key={room.id}
-              style={{ marginRight: '20px', marginBottom: '20px', padding: '20px', border: '1px solid #ccc', borderRadius: '5px' }}
-              onClick={(e) => goToRoom(e, room.id)}>
-              <div style={{ fontWeight: 'bold' }}>{room.name}</div>
-              {/* Other room information goes here */}
-            </button>
-          ))}
-        </div>
+        <>
+          <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+            {rooms.map((room) => (
+              <button key={room.id}
+                style={{ marginRight: '20px', marginBottom: '20px', padding: '20px', border: '1px solid #ccc', borderRadius: '5px' }}
+                onClick={() => handleRoomClick(room)}>
+                <div style={{ fontWeight: 'bold' }}>{room.name}</div>
+                {/* Other room information goes here */}
+              </button>
+            ))}
+          </div>
+          {selectedRoom && <RoomModal room={selectedRoom} />}
+        </>
         :
         "There are no rooms"
       }

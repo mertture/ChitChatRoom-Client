@@ -17,7 +17,7 @@ const CreateRoom: React.FC = () => {
     try {
       setResult(false);
       if (token) {
-        const response = await axios.post("http://localhost:8080/api/room/create", values, {
+        await axios.post("http://localhost:8080/api/room/create", values, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

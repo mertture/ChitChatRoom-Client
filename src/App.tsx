@@ -23,18 +23,16 @@ function App() {
   const token: string = localStorage.getItem("token")!;
   const [user, setUser] = useState<User | null>(null);
 
-  const checkAuth = async () => {
-    console.log("user:");
-    const userValue: User = await checkAuthentication(pathname, token)!;
-    console.log("user:", userValue);
-
-    setUser(userValue);
-  };
-
   useEffect(() => {
+
+    const checkAuth = async () => {
+      const userValue: User = await checkAuthentication(pathname, token)!;
+      setUser(userValue);
+    };
+    
     checkAuth();
     setLoading(false);
-  }, [pathname]);
+  }, [pathname, token]);
 
   if (loading) {
     return <Loading />;
@@ -51,6 +49,7 @@ function App() {
         </>
         :
         <>
+        <Route path="*" Component={Dashboard} />
         <Route path="/dashboard" Component={Dashboard} />
         <Route path="/createroom" Component={CreateRoom} />
         <Route path="/room/:id" Component={Room} />
