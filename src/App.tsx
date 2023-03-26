@@ -45,7 +45,7 @@ function App() {
         <>
         <Route path="/register" Component={Register} />
         <Route path="/login" Component={Login} />
-        <Route path="*" Component={Register} />
+        <Route path="*" Component={Login} />
         </>
         :
         <>

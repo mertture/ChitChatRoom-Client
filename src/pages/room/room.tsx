@@ -1,26 +1,27 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import React from "react";
-
+import { formatEmail } from "../../utils";
 import RoomType from "../../models/room/room";
 import User from "../../models/user/user";
+import { Button } from "antd";
 
 
 const Room: React.FC = () => {
 
-
+  const navigate = useNavigate();
   const { id: roomId } = useParams();
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [room, setRoom] = useState<RoomType | null>(null);
   const [participants, setParticipants] = useState<Array<User> | null>(null);
-  const [socket, setSocket] = useState<WebSocket | null>(null);
+  //const [socket, setSocket] = useState<WebSocket | null>(null);
 
-  useEffect(() => {
-    const newSocket = new WebSocket(`ws://localhost:8080/ws/room/${roomId}`);
-    setSocket(newSocket);
-  }, [roomId]);
+  // useEffect(() => {
+  //   const newSocket = new WebSocket(`ws://localhost:8080/ws/room/${roomId}`);
+  //   setSocket(newSocket);
+  // }, [roomId]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -59,7 +60,6 @@ const Room: React.FC = () => {
               },
             }
           );
-          console.log("fetch rooms:", response);
           setRoom(response.data);
           setParticipants(response.data.participants);
         }
@@ -73,39 +73,74 @@ const Room: React.FC = () => {
   }, [token, roomId]);
 
   useEffect(() => {
+    let socket: WebSocket | null = null;
 
-    if (token && roomId && socket && user) {
-        console.log("isCONNECTED?")
+    const connectSocket = () => {
+      socket = new WebSocket(`ws://localhost:8080/ws/room/${roomId}`);
+      if (socket) {
         socket.onopen = () => {
           console.log("connected");
-          socket.send(JSON.stringify({
-            message: "new participant joined",
-            participant: user.id,
-          }))
+          socket!.send(
+            JSON.stringify({
+              message: "new participant joined",
+              participant: user!.id,
+            })
+          );
         };
-    
+  
         socket.onmessage = (e) => {
-          if (e.data.message === "new participant joined") {
-            console.log('new participant joined', e.data.participant);
-            setParticipants((prevParticipants) =>
-              prevParticipants ? [...prevParticipants, e.data.participant] : [e.data.participant]
-            );
-          }
-          else if (e.data.message === "participant left") {
-            console.log('participant left', e.data.participant);
+          const data = JSON.parse(e.data);
+  
+          if (data.message === "new participant joined") {
+            console.log("new participant joined", data.participant);
             setParticipants((prevParticipants) =>
               prevParticipants
-                ? prevParticipants.filter((p) => p.id !== e.data.participant.id)
+                ? [...prevParticipants, data.participant]
+                : [data.participant]
+            );
+          } else if (data.message === "participant left") {
+            console.log("participant left", data.participant);
+            setParticipants((prevParticipants) =>
+              prevParticipants
+                ? prevParticipants.filter((p) => p.id !== data.participant)
                 : []
             );
           }
         };
-    
-        return () => {
-          socket.close()
-        }
+  
+        socket.onclose = () => {
+          console.log("disconnected");
+          socket!.send(
+            JSON.stringify({
+              message: "participant left",
+              participant: user!.id,
+            })
+          );
+          setTimeout(connectSocket, 10000); // retry after 10 second
+        };
+      }
+    };
+
+    if (token && roomId && user) {
+      connectSocket();
     }
-  }, [token, roomId, socket, user]);
+
+    return () => {
+      if (socket) {
+        socket!.send(
+          JSON.stringify({
+            message: "participant left",
+            participant: user!.id,
+          })
+        );
+        socket.close();
+      }
+    };
+  }, [token, roomId, user]);
+
+  function LeaveRoom() {
+    navigate('/dashboard');
+  }
 
   return (
     <div>
@@ -127,7 +162,7 @@ const Room: React.FC = () => {
                 borderRadius: "5px",
               }}
             >
-              <div style={{ fontWeight: "bold" }}>aa{participant.name}</div>
+              <div style={{ fontWeight: "bold" }}>{formatEmail(participant.email)}</div>
               {/* Other room information goes here */}
             </div>
           ))}
@@ -136,7 +171,7 @@ const Room: React.FC = () => {
         :
         "There is only you"
       }
-
+    <Button onClick={LeaveRoom} block>Leave</Button>
     </div>
   );
 };
