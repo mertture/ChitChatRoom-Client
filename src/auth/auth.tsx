@@ -11,7 +11,6 @@ export async function checkAuthentication(
 ): Promise<User> {
   try {
     if (!token) throw new Error('no token')
-    console.log("TOKEN:", token);
     const user = await (
       await fetch(
         new URL(
@@ -27,7 +26,6 @@ export async function checkAuthentication(
         }
       )
     ).json() as User
-    console.log("USER:", user);
     return user;
   } catch (error) {
     console.log(error)

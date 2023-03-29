@@ -10,18 +10,14 @@ import { Button } from "antd";
 
 const Room: React.FC = () => {
 
+
   const navigate = useNavigate();
   const { id: roomId } = useParams();
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [room, setRoom] = useState<RoomType | null>(null);
   const [participants, setParticipants] = useState<Array<User> | null>(null);
-  //const [socket, setSocket] = useState<WebSocket | null>(null);
-
-  // useEffect(() => {
-  //   const newSocket = new WebSocket(`ws://localhost:8080/ws/room/${roomId}`);
-  //   setSocket(newSocket);
-  // }, [roomId]);
+  const [socket, setSocket] = useState<WebSocket | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -40,7 +36,6 @@ const Room: React.FC = () => {
               },
             }
           );
-          console.log(response);
           setUser(response.data);
         }
       } catch (error) {
@@ -73,70 +68,35 @@ const Room: React.FC = () => {
   }, [token, roomId]);
 
   useEffect(() => {
-    let socket: WebSocket | null = null;
-
-    const connectSocket = () => {
-      socket = new WebSocket(`ws://localhost:8080/ws/room/${roomId}`);
-      if (socket) {
-        socket.onopen = () => {
-          console.log("connected");
-          socket!.send(
-            JSON.stringify({
-              message: "new participant joined",
-              participant: user!.id,
-            })
-          );
-        };
+    if (!socket && user) {
+      const newSocket = new WebSocket("ws://localhost:8080/");
   
-        socket.onmessage = (e) => {
-          const data = JSON.parse(e.data);
+      newSocket.onopen = () => {
+        newSocket.send(JSON.stringify({ action: "join", room: roomId, participant: user.id }));
+      };
   
-          if (data.message === "new participant joined") {
-            console.log("new participant joined", data.participant);
-            setParticipants((prevParticipants) =>
-              prevParticipants
-                ? [...prevParticipants, data.participant]
-                : [data.participant]
-            );
-          } else if (data.message === "participant left") {
-            console.log("participant left", data.participant);
-            setParticipants((prevParticipants) =>
-              prevParticipants
-                ? prevParticipants.filter((p) => p.id !== data.participant)
-                : []
-            );
-          }
-        };
+      setSocket(newSocket);
+    }
   
-        socket.onclose = () => {
-          console.log("disconnected");
-          socket!.send(
-            JSON.stringify({
-              message: "participant left",
-              participant: user!.id,
-            })
-          );
-          setTimeout(connectSocket, 10000); // retry after 10 second
-        };
+    // update the list of users in the room when a new user joins or leaves
+    const handleSocketMessage = (e: MessageEvent<any>) => {
+      const data = JSON.parse(e.data);
+      switch (data.action) {
+        case "users":
+          setParticipants(data.participants);
       }
     };
-
-    if (token && roomId && user) {
-      connectSocket();
-    }
-
+    socket?.addEventListener("message", handleSocketMessage);
+  
+    // leave the room on component unmount
     return () => {
-      if (socket) {
-        socket!.send(
-          JSON.stringify({
-            message: "participant left",
-            participant: user!.id,
-          })
-        );
+      if (socket && user) {
+        socket.send(JSON.stringify({ action: "leave", room: roomId, participant: user.id }));
         socket.close();
       }
     };
-  }, [token, roomId, user]);
+  }, [roomId, user, socket]);
+
 
   function LeaveRoom() {
     navigate('/dashboard');
@@ -149,7 +109,7 @@ const Room: React.FC = () => {
         :
         ""
       }
-      {participants !== null ? (
+      {participants ? (
         <div style={{ display: "flex", flexWrap: "wrap" }}>
           {participants.map((participant) => (
             <div

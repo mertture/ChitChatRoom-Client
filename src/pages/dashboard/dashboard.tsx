@@ -55,7 +55,6 @@ const Dashboard: React.FC = () => {
               Authorization: `Bearer ${token}`,
             },
           });
-          console.log("fetch rooms:", response);
           setRooms(response.data);
         }
       } catch (error) {
