@@ -21,6 +21,7 @@ const Room: React.FC = () => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [chatMessages, setChatMessages] = useState<Array<Message>>([]);
   const [messageText, setMessageText] = useState("");
+  const [showChat, setShowChat] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -59,7 +60,6 @@ const Room: React.FC = () => {
             }
           );
           setRoom(response.data);
-          setParticipants(response.data.participants);
         }
       } catch (error) {
         console.error(error);
@@ -132,11 +132,16 @@ const Room: React.FC = () => {
 
   return (
     <div>
-      {room !== null ?
-        <h1>Welcome to room, {room.name}!</h1>
-        :
-        ""
-      }
+       {room ? (
+        <div className="room-header">
+          <h1>Welcome to Room {room.name}!</h1>
+          <Button onClick={LeaveRoom}>Leave Room</Button>
+        </div>
+      ) : (
+        <div className="room-header">
+          <h1>Loading Room...</h1>
+        </div>
+      )}
       {participants ? (
         <div style={{ display: "flex", flexWrap: "wrap" }}>
           {participants.map((participant) => (
@@ -159,8 +164,10 @@ const Room: React.FC = () => {
         :
         "There is only you"
       }
-
-      <div style={{ marginTop: "20px" }}>
+      <div className="chat-tab">
+        <button onClick={() => setShowChat(!showChat)}>Toggle Chat</button>
+      </div>
+      <div className={`chat-container ${showChat ? 'show' : 'hide'}`}>
         <div style={{ fontWeight: "bold", marginBottom: "10px" }}>Chat:</div>
         <div style={{ maxHeight: "200px", overflowY: "scroll", marginBottom: "10px" }}>
           {chatMessages ? chatMessages.map((message) => (
@@ -181,7 +188,6 @@ const Room: React.FC = () => {
           <button type="submit">Send</button>
         </form>
       </div>
-      <Button onClick={LeaveRoom} block>Leave</Button>
     </div>
   );
 };

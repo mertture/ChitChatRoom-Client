@@ -6,10 +6,78 @@
   
   .chat-message.sent {
     background-color: #e2f7fe;
-    align-self: flex-end;
+    text-align: right;
   }
   
   .chat-message.received {
     background-color: #f0f0f0;
-    align-self: flex-start;
+    text-align: left;
+
+  }
+  
+  .chat-container.show {
+    right: 0;
+  }
+  
+  .chat-container.hide {
+    right: -300px;
+  }
+
+  .chat-tab {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    border-radius: 5px 0 0 0;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .chat-tab:hover {
+    background-color: #eeeeee;
+  }
+  
+  /* Style for chat container */
+  .chat-container {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 300px;
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    border-radius: 0 0 5px 0;
+    padding: 10px 15px;
+    transition: all 0.2s ease;
+    transform: translateX(100%);
+  }
+  
+  .chat-container.show {
+    transform: translateX(0);
+  }
+  
+  .chat-message .meta {
+    font-size: 12px;
+    color: #666666;
+    margin-top: 5px;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  /* Style for leave room button */
+  button {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #cccccc;
+    color: #ffffff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 10px;
+  }
+  
+  button:hover {
+    background-color: #aaaaaa;
   }
