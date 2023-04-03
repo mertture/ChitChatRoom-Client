@@ -29,6 +29,13 @@ const Room: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const chatContainer = document.querySelector('.scroll-container');
+    if (chatContainer !== null) {
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+  }, [showChat, chatMessages]);
+
+  useEffect(() => {
     const fetchUser = async () => {
       try {
         if (token) {
@@ -169,7 +176,7 @@ const Room: React.FC = () => {
       </div>
       <div className={`chat-container ${showChat ? 'show' : 'hide'}`}>
         <div style={{ fontWeight: "bold", marginBottom: "10px" }}>Chat:</div>
-        <div style={{ maxHeight: "200px", overflowY: "scroll", marginBottom: "10px" }}>
+        <div className={'scroll-container'} style={{ maxHeight: "200px", overflowY: "scroll", marginBottom: "10px" }}>
           {chatMessages ? chatMessages.map((message) => (
             <div
               key={message.id}
